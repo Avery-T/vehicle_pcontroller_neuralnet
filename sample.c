@@ -12,10 +12,19 @@
 #define MAX_TURN_SNIFF 300
 #define TURN_SPEED 35
 
+
+typedef struct motor_command
+{ 
+  int8_t left_motor_speed; 
+  int8_t right_motor_speed; 
+} motor_command; 
+
+
 void motor(u08 num, int8_t speed); 
 void test_motor_with_accel();
 void print_signed_num(int16_t num);
 void range_motors();
+
 u08 turn_l();
 u08 turn_r();
 
@@ -62,7 +71,7 @@ void p_controller()
      // less than is the white bir
      if(output_right_sensor  < DESIRED  ){
        motor(0, ((-output_right_sensor +  DESIRED) * KP));
-       motor(1, 10); 
+//       motor(1, 10); 
      } 
 
      else {
@@ -71,7 +80,7 @@ void p_controller()
   
      if(output_left_sensor  < DESIRED  ){
        motor(1, (((-output_left_sensor +  DESIRED) * KP)));
-       motor(0, 10);
+ //      motor(0, 10);
      } 
     else 
     {
