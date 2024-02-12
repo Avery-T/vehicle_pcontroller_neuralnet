@@ -19,6 +19,8 @@ typedef struct motor_command
   int8_t right_motor_speed; 
 } motor_command; 
 
+motor_command compute_proportional(uint8_t left, uint8_t right); 
+
 
 void motor(u08 num, int8_t speed); 
 void test_motor_with_accel();
@@ -37,16 +39,39 @@ int main(void) {
     init();  //initialize board hardware
     init_lcd(); 
     init_adc(); 
+
     motor(0, 0);
     motor(1, 0);
+
     p_controller(); 
+
   return 0;
 }
+
+motor_command compute_proportional(uint8_t left, uint8_t right)
+{
+  motor_command val = {0}; 
+
+  if(right  < DESIRED  ){
+     val.left_motor_speed = (-right +  DESIRED) * KP;
+  } 
+
+  else {
+    val.left_motor_speed =  75;
+  } 
+ 
+  if(left < DESIRED){
+       val.right_motor_speed = (-left +  DESIRED) * KP;
+  } 
+   else {
+      val.right_motor_speed =  75; 
+  }
+ return val;  
+} 
 
 //void 90_degree_turn(uint8_t turn_direction); 
 void p_controller()
 {
-
    int16_t error = 0; 
    
    uint8_t right_turn_flag = 0; 
@@ -63,24 +88,19 @@ void p_controller()
  uint8_t pinsel1 = 1; 
  u08 turn_res = 0;
  while(!get_btn());   
-  while(1)
-   {
       output_right_sensor = analog(4);  /// right side 
       output_left_sensor = analog(5); //left side 
      //spin the left motor to go to the right 
      // less than is the white bir
      if(output_right_sensor  < DESIRED  ){
        motor(0, ((-output_right_sensor +  DESIRED) * KP));
-//       motor(1, 10); 
      } 
 
      else {
       motor(0, 75);
     } 
-  
      if(output_left_sensor  < DESIRED  ){
        motor(1, (((-output_left_sensor +  DESIRED) * KP)));
- //      motor(0, 10);
      } 
     else 
     {
@@ -102,7 +122,6 @@ void p_controller()
      lcd_cursor(0,1); 
      print_num(output_left_sensor);  
      
-    }
 }
 
 u08 turn_l() {
