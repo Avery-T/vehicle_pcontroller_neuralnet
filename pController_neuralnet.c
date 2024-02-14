@@ -36,7 +36,7 @@ typedef struct sensor_reading
   u08 right;
 } sensor_reading; 
 
-typedef struct normalized_data
+typedef struct __attribute__((packed)) normalized_data
 { 
   float left; 
   float right;
@@ -58,13 +58,16 @@ typedef struct out_neuron
 
 motor_command compute_proportional(uint8_t left, uint8_t right); 
 uint8_t calibrate_brightness(uint8_t pin);
+int32_t get_btn_seed();
 
 void populate_dataset(normalized_data* input, normalized_data* output);
 void randomize_hidden_layer(hidden_neuron* h_layer);
 void randomize_output_layer(out_neuron* o_layer);
+normalized_data normalize_target(motor_command cmd);
 
 void back_prop(normalized_data input, normalized_data actual, normalized_data target, hidden_neuron* h_layer, out_neuron* o_layer);
 normalized_data inference(normalized_data sensors, hidden_neuron* h_layer, out_neuron* o_layer);
+float activation_function(float x);
 
 
 int main(void) {
@@ -81,12 +84,12 @@ int main(void) {
     populate_dataset(input_data, target_data);
 
     randomize_hidden_layer(h_layer);
-    randomize_outer_layer(o_layer);
+    randomize_output_layer(o_layer);
 
     for (int i = 0; i < EPOCHS; i++) {
-        for (j = 0; j < NUM_INPUT; j++) {
-            normalized_data actual = inference(input_data[j], &h_layer, &o_layer);
-            back_prop(input_data[j], actual, target_data[j], &h_layer, &o_layer);
+        for (int j = 0; j < NUM_INPUT; j++) {
+            normalized_data actual = inference(input_data[j], h_layer, o_layer);
+            back_prop(input_data[j], actual, target_data[j], h_layer, o_layer);
         }
     }
 
@@ -98,7 +101,7 @@ void back_prop(normalized_data input, normalized_data actual, normalized_data ta
     out_neuron o_layer_new[NUM_OUT_NEURONS];
 
     for (int i = 0; i < NUM_HIDDEN_NEURONS; i++) {
-        h_layer_new[i] = {0};
+        h_layer_new[i] = (hidden_neuron){{0}, 0, 0};
     }
 
     for (int i = 0; i < NUM_OUT_NEURONS; i++) {
@@ -168,7 +171,7 @@ normalized_data inference(normalized_data sensors, hidden_neuron* h_layer, out_n
 }
 
 float activation_function(float x) {
-    return 1/(1 + powf(MATH_E, -x))
+    return 1/(1 + powf(MATH_E, -x));
 }
 
 int32_t get_btn_seed() {
@@ -177,6 +180,8 @@ int32_t get_btn_seed() {
         _delay_ms(1);
         counter++;
     }
+
+    return counter;
 }
 
 void populate_dataset(normalized_data* input_data, normalized_data* target_data) {
