@@ -1,16 +1,16 @@
-#include "globals.h"
-#include <util/delay.h>
-#include <avr/io.h>
-#include <avr/interrupt.h>
 #include <stdlib.h>
 #include <math.h>
+#include <stdint.h>
+#include <stdio.h>
+
+typedef uint8_t u08;
 
 #define MAX_SPEED 100
 #define DELAY 100
 #define EPSILON 20
 #define SCALE_DENOM 100
 #define DESIRED 200
-#define KP .025f
+#define KP .15f
 #define DEFAULT_SPEED 75
 #define HIDDEN_IN 2
 #define OUT_IN 3
@@ -20,8 +20,10 @@
 #define RIGHT_SENSOR 4
 #define LEFT_SENSOR 5
 #define MATH_E 2.71828183f
-#define LEARN_RATE 0.15f
-#define EPOCHS 50
+#define LEARN_RATE 0.4f
+#define EPOCHS 500
+
+#define TEST_IN 6
 
 
 typedef struct motor_command
@@ -57,40 +59,55 @@ typedef struct out_neuron
 } out_neuron;
 
 motor_command compute_proportional(uint8_t left, uint8_t right); 
-uint8_t calibrate_brightness(uint8_t pin);
+
 int32_t get_btn_seed();
 
-void populate_dataset(normalized_data* input, normalized_data* output);
+void populate_dataset(sensor_reading* input, normalized_data* output);
 void randomize_hidden_layer(hidden_neuron* h_layer);
 void randomize_output_layer(out_neuron* o_layer);
 normalized_data normalize_target(motor_command cmd);
+void normalize_input(sensor_reading* input, normalized_data* norm_input);
 
 void back_prop(normalized_data input, normalized_data actual, normalized_data target, hidden_neuron* h_layer, out_neuron* o_layer);
 normalized_data inference(normalized_data sensors, hidden_neuron* h_layer, out_neuron* o_layer);
 float activation_function(float x);
 
+sensor_reading test_input[TEST_IN] = 
+{
+    {127, 127},
+    {127, 0},
+    {0, 127},
+    {0, 0},
+    {255, 255},
+    {250, 245}
+};
 
 int main(void) {
-    init();  //initialize board hardware
-    int32_t seed = 486874345; //get_btn_seed();
+    //init();  //initialize board hardware
+    int32_t seed =1; //random
     srand(seed * seed % (RAND_MAX / 2));
 
-    normalized_data input_data[NUM_INPUT];
-    normalized_data target_data[NUM_INPUT];
-
+    normalized_data input_data[TEST_IN];
+    normalized_data target_data[TEST_IN];
     hidden_neuron h_layer[NUM_HIDDEN_NEURONS];
     out_neuron o_layer[NUM_OUT_NEURONS];
     
-    populate_dataset(input_data, target_data);
+    normalize_input(test_input, input_data);
+    populate_dataset(test_input, target_data);
 
     randomize_hidden_layer(h_layer);
     randomize_output_layer(o_layer);
 
     for (int i = 0; i < EPOCHS; i++) {
-        for (int j = 0; j < NUM_INPUT; j++) {
+        for (int j = 0; j < TEST_IN; j++) {
             normalized_data actual = inference(input_data[j], h_layer, o_layer);
             back_prop(input_data[j], actual, target_data[j], h_layer, o_layer);
         }
+    }
+
+    normalized_data tests[TEST_IN];
+    for (int i = 0; i < TEST_IN; i++) {
+        tests[i] = inference(input_data[i], h_layer, o_layer);
     }
 
     return 0;
@@ -176,22 +193,23 @@ float activation_function(float x) {
 
 int32_t get_btn_seed() {
     int32_t counter = 0;
-    while (!get_btn()) {
-        _delay_ms(1);
-        counter++;
-    }
-
-    return counter;
+    // while (!get_btn()) {
+    //     _delay_ms(1);
+    //     counter++;
+    // }
+    // return counter;
 }
 
-void populate_dataset(normalized_data* input_data, normalized_data* target_data) {
-    for (int i = 0; i < NUM_INPUT; i++) {
-        u08 left = analog(LEFT_SENSOR);
-        u08 right = analog(RIGHT_SENSOR);
-        target_data[i] = normalize_target(compute_proportional(left, right));
-        input_data[i].left = (float)left / 255.0f;
-        input_data[i].right = (float)right / 255.0f;
-        _delay_ms(100);
+void populate_dataset(sensor_reading* input_data, normalized_data* target_data) {
+    for (int i = 0; i < TEST_IN; i++) {
+        target_data[i] = normalize_target(compute_proportional(input_data[i].left, input_data[i].right));
+    }
+}
+
+void normalize_input(sensor_reading* input_data, normalized_data* norm_input_data) {
+    for (int i = 0; i < TEST_IN; i++) {
+        norm_input_data[i].left = (float)input_data[i].left / 255.0f;
+        norm_input_data[i].right = (float)input_data[i].right / 255.0f;
     }   
 }
 
@@ -205,8 +223,8 @@ normalized_data normalize_target(motor_command cmd) {
 
 void randomize_hidden_layer(hidden_neuron* h_layer) {
     for (int i = 0; i < NUM_HIDDEN_NEURONS; i++) {
-        for (int j = 0; i < HIDDEN_IN; j++) {
-            h_layer[i].w[j] = (float)rand() / RAND_MAX;
+        for (int j = 0; j < HIDDEN_IN; j++) {
+            (h_layer[i]).w[j] = (float)rand() / RAND_MAX;
         }
         h_layer[i].bias = (float)rand() / RAND_MAX;
     }
@@ -214,8 +232,8 @@ void randomize_hidden_layer(hidden_neuron* h_layer) {
 
 void randomize_output_layer(out_neuron* o_layer) {
     for (int i = 0; i < NUM_OUT_NEURONS; i++) {
-        for (int j = 0; i < OUT_IN; j++) {
-            o_layer[i].w[j] = (float)rand() / RAND_MAX;
+        for (int j = 0; j < OUT_IN; j++) {
+            (o_layer[i]).w[j] = (float)rand() / RAND_MAX;
         }
         o_layer[i].bias = (float)rand() / RAND_MAX;
     }
@@ -223,22 +241,15 @@ void randomize_output_layer(out_neuron* o_layer) {
 
 motor_command compute_proportional(uint8_t left, uint8_t right)
 {
-    motor_command val = {0}; 
+    motor_command val = {0,0};
 
-    val.left_motor_speed = right < DESIRED ? (-right + DESIRED) * KP : DEFAULT_SPEED;
-    val.right_motor_speed = left < DESIRED ? (-left + DESIRED) * KP : DEFAULT_SPEED;
+    val.left_motor_speed = left * 100.0f / 255.0f;
+    val.right_motor_speed = right * 100.0f / 255.0f;
+    
+    //val.left_motor_speed = right < DESIRED ? (-right + DESIRED) * KP : DEFAULT_SPEED;
+    //val.right_motor_speed = left < DESIRED ? (-left + DESIRED) * KP : DEFAULT_SPEED;
 
     return val;  
 }
 
-uint8_t calibrate_brightness(uint8_t pin) 
-{
-    uint16_t temp = 0; 
-    // calibration
-    for(int i = 0; i<20; i++) 
-    {
-        temp+=analog(pin); 
-    }
 
-    return temp/20;
-}
