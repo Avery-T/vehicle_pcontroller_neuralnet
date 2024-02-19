@@ -37,10 +37,6 @@ void neural_net_p_controller(neural_net * net)
      motor(1, motor_command.left * 100); 
      motor(0, motor_command.right*100);  
    } 
-  // print_num( net[0].o_layer->w[0]);
-   // print_num( net[0].o_layer->out);
-   // print_num( net[0].o_layer->bias);
-
 
 }
 void get_sensor_input(sensor_reading * sensor_data)
