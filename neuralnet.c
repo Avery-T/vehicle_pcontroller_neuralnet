@@ -1,8 +1,12 @@
 #include <stdlib.h>
+#include "globals.h"
 #include <math.h>
 #include <stdint.h>
 #include <stdio.h>
+#include  <avr/interrupt.h>
+#include <avr/io.h> 
 #include "neuralnet.h"
+#include "pound_defines.h"
 
 
 neural_net train_and_init (sensor_reading * sensor_data) {
@@ -22,11 +26,17 @@ neural_net train_and_init (sensor_reading * sensor_data) {
     randomize_hidden_layer(net.h_layer);
     randomize_output_layer(net.o_layer);
 
+    clear_screen();  
+    
     for (int i = 0; i < EPOCHS; i++) {
+      
         for (int j = 0; j < NUM_INPUT; j++) {
             normalized_data actual = inference(input_data[j], net.h_layer, net.o_layer);
             back_prop(input_data[j], actual, target_data[j], net.h_layer, net.o_layer);
         }
+      lcd_cursor(0,0); 
+      print_string("epoc ");
+      print_num(i); 
     }
     return net;
 }

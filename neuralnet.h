@@ -5,33 +5,9 @@
 #include <math.h>
 #include <stdint.h>
 #include <stdio.h>
+#include "pound_defines.h"
 
 typedef uint8_t u08;
-
-#define MAX_SPEED 100
-#define DELAY 100
-#define EPSILON 20
-#define SCALE_DENOM 100
-#define DESIRED 200
-#define KP .15f
-#define DEFAULT_SPEED 75
-#define HIDDEN_IN 2
-#define OUT_IN 3
-#define NUM_INPUT 50
-#define NUM_HIDDEN_NEURONS 3
-#define NUM_OUT_NEURONS 2
-#define RIGHT_SENSOR 4
-#define LEFT_SENSOR 5
-#define MATH_E 2.71828183f
-#define LEARN_RATE 0.4f
-#define EPOCHS 500
-
-
-typedef struct motor_command
-{ 
-  int8_t left_motor_speed; 
-  int8_t right_motor_speed; 
-} motor_command; 
 
 typedef struct sensor_reading
 { 
@@ -80,14 +56,14 @@ float activation_function(float x);
 
 neural_net train_and_init(sensor_reading * sensor_data);
 
-sensor_reading test_input[TEST_IN] = 
-{
-    {127, 127},
-    {127, 0},
-    {0, 127},
-    {0, 0},
-    {255, 255},
-    {250, 245}
-};
+//sensor_reading test_input[NUM_INPUT] = 
+//{
+//    {127, 127},
+//    {127, 0},
+//    {0, 127},
+//    {0, 0},
+//    {255, 255},
+//    {250, 245}
+//};
 
 #endif 
