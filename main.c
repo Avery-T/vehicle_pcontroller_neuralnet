@@ -12,6 +12,7 @@ int main(void) {
     init_adc(); 
     motor(0, 0);
     motor(1, 0);
+
   //  p_controller();
 	//	sensorTest(); 
     //p_controller(); 
