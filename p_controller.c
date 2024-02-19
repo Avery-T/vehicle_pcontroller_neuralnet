@@ -11,26 +11,26 @@
 //} motor_command; 
 
 
-motor_command compute_proportional(uint8_t left, uint8_t right)
-{
-  motor_command val = {0}; 
+//motor_command compute_proportional(uint8_t left, uint8_t right)
+//{
+//  motor_command val = {0}; 
 
-  if(right  < DESIRED  ){
-     val.left_motor_speed = (-right +  DESIRED) * KP;
-  } 
+ // if(right  < DESIRED  ){
+//     val.left_motor_speed = (-right +  DESIRED) * KP;
+//  } 
 
-  else {
-    val.left_motor_speed =  75;
-  } 
+//  else {
+//    val.left_motor_speed =  75;
+//  } 
  
-  if(left < DESIRED){
-       val.right_motor_speed = (-left +  DESIRED) * KP;
-  } 
-   else {
-      val.right_motor_speed =  75; 
-  }
- return val;  
-} 
+//  if(left < DESIRED){
+//       val.right_motor_speed = (-left +  DESIRED) * KP;
+//  } 
+//   else {
+//      val.right_motor_speed =  75; 
+//  }
+// return val;  
+//} 
 
 //void 90_degree_turn(uint8_t turn_direction); 
 void p_controller()

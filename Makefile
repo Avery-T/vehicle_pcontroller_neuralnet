@@ -4,7 +4,7 @@ SOURCE_LIB = $(wildcard $(BOARD_LIB)/*.c)
 CLOCK_RATE = 16000000L
 
 net: main.c $(wildcard $(BOARD_LIB)/*.c)
-	avr-gcc -I$(BOARD_LIB) -I$(SELF_DIR) -DF_CPU=$(CLOCK_RATE)  -mmcu=atmega645a -O2 -o main.elf main.c p_controller.c $(wildcard $(BOARD_LIB)/*.c)
+	avr-gcc -I$(BOARD_LIB) -I$(SELF_DIR) -DF_CPU=$(CLOCK_RATE)  -mmcu=atmega645a -O2 -o main.elf main.c p_controller.c neuralnet.c $(wildcard $(BOARD_LIB)/*.c)
 	avr-objcopy -O ihex main.elf main.hex
 	avr-size main.elf
 
