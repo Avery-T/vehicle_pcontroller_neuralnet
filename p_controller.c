@@ -4,33 +4,6 @@
 #include <avr/interrupt.h>
 #include "p_controller.h"
 
-//typedef struct motor_command
-//{ 
-//j  int8_t left_motor_speed; 
-//  int8_t right_motor_speed; 
-//} motor_command; 
-
-
-//motor_command compute_proportional(uint8_t left, uint8_t right)
-//{
-//  motor_command val = {0}; 
-
- // if(right  < DESIRED  ){
-//     val.left_motor_speed = (-right +  DESIRED) * KP;
-//  } 
-
-//  else {
-//    val.left_motor_speed =  75;
-//  } 
- 
-//  if(left < DESIRED){
-//       val.right_motor_speed = (-left +  DESIRED) * KP;
-//  } 
-//   else {
-//      val.right_motor_speed =  75; 
-//  }
-// return val;  
-//} 
 
 //void 90_degree_turn(uint8_t turn_direction); 
 void p_controller()
@@ -50,6 +23,9 @@ void p_controller()
  uint8_t pinsel0 =0;
  uint8_t pinsel1 = 1; 
  u08 turn_res = 0;
+ print_string("Proporti"); 
+ lcd_cursor(0,1); 
+ print_string("onal"); 
  while(!get_btn());   
  _delay_ms(400);
 
@@ -59,29 +35,29 @@ void p_controller()
       output_left_sensor = analog(5); //left side 
      //spin the left motor to go to the right 
      // less than is the white bir
-     if(output_right_sensor  < DESIRED  ){
+     if(output_right_sensor  < DESIRED -15  ){
        motor(0, ((-output_right_sensor +  DESIRED) * KP));
      } 
 
      else {
-      motor(0, 75);
+      motor(0, DEFAULT_SPEED);
     } 
      if(output_left_sensor  < DESIRED  ){
        motor(1, (((-output_left_sensor +  DESIRED) * KP)));
      } 
     else 
     {
-       motor(1,75); 
+       motor(1,DEFAULT_SPEED); 
     }
 
-    if (turn_res) {
-     turn_l();
-     turn_res = 0;
-   }
-   else if(output_right_sensor < 175 || output_left_sensor < 175)
-   { 
-     turn_res = turn_r(); 
-   }
+   // if (turn_res) {
+   //  turn_l();
+  //   turn_res = 0;
+  // }
+   //else if(output_right_sensor < 175 || output_left_sensor < 175)
+   //{ 
+   //  turn_res = turn_r(); 
+  // }
 
      _delay_ms(100);
     lcd_cursor(0,0); 
