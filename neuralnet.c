@@ -9,7 +9,7 @@
 #include "pound_defines.h"
 
 
-neural_net train_and_init (sensor_reading * sensor_data) {
+neural_net train_and_init (sensor_reading * sensor_data, uint16_t epochs) {
     neural_net net; 
     //init();  //initialize board hardware
     int32_t seed =1; //random
@@ -27,7 +27,7 @@ neural_net train_and_init (sensor_reading * sensor_data) {
     randomize_output_layer(net.o_layer);
 
     
-    for (int i = 0; i < EPOCHS; i++) {
+    for (int i = 0; i < epochs; i++) {
       
         for (int j = 0; j < NUM_INPUT; j++) {
             normalized_data actual = inference(input_data[j], net.h_layer, net.o_layer);
@@ -173,8 +173,8 @@ motor_command compute_proportional(uint8_t left, uint8_t right)
  //   val.left_motor_speed = left * 100.0f / 255.0f;
  //   val.right_motor_speed = right * 100.0f / 255.0f;
     
-    val.left_motor_speed = right < DESIRED ? (-right + DESIRED) * KP : DEFAULT_SPEED;
-    val.right_motor_speed = left < DESIRED ? (-left + DESIRED) * KP : DEFAULT_SPEED;
+    val.left_motor_speed = right < DESIRED ? (-right + DESIRED) * (1) * KP : DEFAULT_SPEED;
+    val.right_motor_speed = left < DESIRED ? (-left + DESIRED) * (1) * KP : DEFAULT_SPEED;
 
     return val;  
 }

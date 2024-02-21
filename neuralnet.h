@@ -54,7 +54,7 @@ void back_prop(normalized_data input, normalized_data actual, normalized_data ta
 normalized_data inference(normalized_data sensors, hidden_neuron* h_layer, out_neuron* o_layer);
 float activation_function(float x);
 
-neural_net train_and_init(sensor_reading * sensor_data);
+neural_net train_and_init(sensor_reading * sensor_data, uint16_t epochs);
 
 //sensor_reading test_input[NUM_INPUT] = 
 //{

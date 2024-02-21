@@ -35,15 +35,15 @@ void p_controller()
       output_left_sensor = analog(5); //left side 
      //spin the left motor to go to the right 
      // less than is the white bir
-     if(output_right_sensor  < DESIRED -15  ){
-       motor(0, ((-output_right_sensor +  DESIRED) * KP));
+     if(output_right_sensor  < DESIRED  ){
+       motor(0, -((-output_right_sensor +  DESIRED) * KP));
      } 
 
      else {
       motor(0, DEFAULT_SPEED);
     } 
      if(output_left_sensor  < DESIRED  ){
-       motor(1, (((-output_left_sensor +  DESIRED) * KP)));
+       motor(1, -(((-output_left_sensor +  DESIRED) * KP)));
      } 
     else 
     {
